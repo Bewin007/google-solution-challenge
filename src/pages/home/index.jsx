@@ -1,7 +1,23 @@
 import React, { useState } from "react";
 import Navbar from "../../components/navbar";
-import { Container,Card, Typography, TextField, FormControl, FormControlLabel, Radio, RadioGroup, Button, Grid, Select, MenuItem } from "@mui/material";
+
+import {
+  Container,
+  Typography,
+  TextField,
+  FormControl,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Button,
+  Grid,
+  Select,
+  MenuItem,
+  Paper,
+} 
+from "@mui/material";
 import { useDropzone } from "react-dropzone";
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const languageOptions = [
     { value: "ar", label: "Arabic" },
@@ -82,71 +98,88 @@ export default function Home() {
 
     return (
         <>
-            <Navbar />
-            <Container maxWidth="md" style={{ margin: '20px' }}>
-                {/* <Typography variant="h1" component="h1" gutterBottom>
-                    Upload PDF
-                </Typography> */}
-                <form onSubmit={handleSubmit}>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12}>
-                            <FormControl component="fieldset">
-                                <RadioGroup
-                                    row
-                                    aria-label="format"
-                                    name="format"
-                                    value={selectedFormat}
-                                    onChange={handleFormatChange}
-                                >
-                                    <FormControlLabel value="pdf" control={<Radio />} label="PDF" />
-                                    <FormControlLabel value="audio" control={<Radio />} label="Audio" />
-                                </RadioGroup>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <center>
-                                <Button>
-                                <div {...getRootProps()} style={{ cursor: 'pointer' }}>
-                                    <input {...getInputProps()} />
-                                    <Typography variant="body1" component="label" htmlFor="pdf-file">
-                                        {pdfFile ? `File: ${pdfFile.name}` : 'Drag and drop or click here to upload PDF'}
-                                    </Typography>
-                                </div>
-                                </Button>
-                            </center>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                id="name"
-                                type="text"
-                                value={name}
-                                onChange={handleNameChange}
-                                fullWidth
-                                label="Name (optional)"
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Select
-                                id="language"
-                                value={selectedLanguage}
-                                onChange={handleLanguageChange}
-                                fullWidth
-                                label="Language"
-                            >
-                                <MenuItem value="">Select Language</MenuItem>
-                                {languageOptions.map(option => (
-                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                                ))}
-                            </Select>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Button type="submit" variant="contained" color="primary">
-                                Upload
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </form>
-            </Container>
+          <Navbar />
+          <Container maxWidth="md" sx={{ margin: '20px auto', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Paper elevation={3} sx={{ padding: '20px', width: '100%', maxWidth: 600, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Typography variant="h4" component="h2" gutterBottom color="primary" sx={{ marginBottom: 3 }}>
+                Translate Document
+              </Typography>
+              <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                <Grid container spacing={2} direction="column" alignItems="center" justifyContent="center">
+                  
+                  {/* Radio buttons for format selection */}
+                  <Grid item xs={12}>
+                    <FormControl component="fieldset">
+                      <RadioGroup
+                        row
+                        aria-label="format"
+                        name="format"
+                        value={selectedFormat}
+                        onChange={handleFormatChange}
+                        sx={{ justifyContent: 'center' }}
+                      >
+                        <FormControlLabel value="pdf" control={<Radio />} label="PDF" sx={{ marginRight: 4 }} />
+                        <FormControlLabel value="audio" control={<Radio />} label="Audio" />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+    
+                  {/* Dropzone for file upload */}
+                  <Grid item xs={12}>
+                    <Button variant="outlined" startIcon={<CloudUploadIcon />} sx={{ cursor: 'pointer' }}>
+                      <div {...getRootProps()}>
+                        <input {...getInputProps()} />
+                        <Typography variant="body1" component="label" htmlFor="pdf-file">
+                          {pdfFile ? `File: ${pdfFile.name}` : 'Drag and drop or click here to upload PDF'}
+                        </Typography>
+                      </div>
+                    </Button>
+                  </Grid>
+    
+                  {/* Text field for name input */}
+                  <Grid item xs={12}>
+                    <TextField
+                      id="name"
+                      type="text"
+                      value={name}
+                      onChange={handleNameChange}
+                      fullWidth
+                      label="Name (optional)"
+                      variant="outlined"
+                      sx={{ width: '100%' }} // Ensures full width
+                    />
+                  </Grid>
+    
+                  {/* Language selection dropdown */}
+                  <Grid item xs={12}>
+                    <FormControl fullWidth> {/* Ensures full width */}
+                      <Select
+                        id="language"
+                        value={selectedLanguage}
+                        onChange={handleLanguageChange}
+                        displayEmpty
+                        fullWidth
+                        variant="outlined"
+                        sx={{ width: '100%' }} // Ensures full width
+                        >
+                        <MenuItem value="" disabled>Select Language</MenuItem>
+                        {languageOptions.map(option => (
+                          <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+    
+                  {/* Upload button */}
+                  <Grid item xs={12}>
+                    <Button type="submit" variant="contained" color="primary" sx={{ width: '100%', marginTop: 2 }}>
+                      Upload
+                    </Button>
+                  </Grid>
+                </Grid>
+              </form>
+            </Paper>
+          </Container>
         </>
-    );
+      );
 }
