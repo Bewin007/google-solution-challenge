@@ -40,3 +40,7 @@
 .read-the-docs {
   color: #888;
 } */
+/* In App.css or your main CSS file */
+body {
+  background-color: #f7f7f7; /* Or any other color you prefer */
+}
