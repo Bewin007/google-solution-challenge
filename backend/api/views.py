@@ -153,8 +153,73 @@ def translate_book(path,target_lang):
 
 
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r'E:\google solution challenge\backend\backend\test.py\manifest-sum-415213-38dc966ac325.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r'E:\google solution challenge\backend\test\manifest-sum-415213-38dc966ac325.json'
 # Function to extract text from PDF
+# def extract_text_from_pdf(pdf_path):
+#     text = ''
+#     with open(pdf_path, 'rb') as file:
+#         reader = PyPDF2.PdfReader(file)
+#         for page in reader.pages:
+#             text += page.extract_text() + ' '
+#     return text
+
+# # Function to detect language using Google Cloud Translation API
+# def detect_language(text):
+#     translate_client = translate.Client()
+
+#     # Using only the first 100 characters for language detection
+#     sample_text = text[:100]
+#     result = translate_client.detect_language(sample_text)
+    
+#     return result['language']
+
+# def text_to_speech(text, language_code, pdf_path):
+#     client = texttospeech.TextToSpeechClient()
+#     combined_audio = AudioSegment.empty()  # For combining audio chunks
+
+#     # Function to split text into chunks based on byte size, not character count
+#     def split_text_by_byte_limit(text, byte_limit=4800):  # Slightly less than 5000 for safety
+#         chunks = []
+#         current_chunk = ""
+#         for char in text:
+#             if len((current_chunk + char).encode('utf-8')) > byte_limit:
+#                 chunks.append(current_chunk)
+#                 current_chunk = char
+#             else:
+#                 current_chunk += char
+#         chunks.append(current_chunk)  # Add the last chunk if it's not empty
+#         return chunks
+
+#     chunks = split_text_by_byte_limit(text)
+
+#     for i, chunk in enumerate(chunks):
+
+#         synthesis_input = texttospeech.SynthesisInput(text=chunk)
+#         voice = texttospeech.VoiceSelectionParams(language_code=language_code, ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL)
+#         audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
+#         response = client.synthesize_speech(input=synthesis_input, voice=voice, audio_config=audio_config)
+
+#         # Convert response audio content to an audio segment
+#         audio_segment = AudioSegment.from_file(io.BytesIO(response.audio_content), format="mp3")
+#         combined_audio += audio_segment  # Append audio segment to the combined audio
+#     print(1)
+#     # Export combined audio to a single MP3 file
+#     combined_audio.export(f"/upload/audiobook_{pdf_path.split('/')[-1].rstrip('.pdf')}.mp3", format="mp3")
+
+
+#     os.path.join('upload', f"audiobook_{pdf_path.split('/')[-1].rstrip('.pdf')}.mp3")
+
+# # Main execution flow
+
+# def generate_audiobook(pdf_path):
+#     text = extract_text_from_pdf(pdf_path)
+#     language_code = detect_language(text)  # Detect language from the first part of the text
+#     text_to_speech(text, language_code, pdf_path)  # Convert text to speech and combine into a single MP3
+#     audiobook_file_path = os.path.join('upload', f"audiobook_{os.path.basename(pdf_path).rstrip('.pdf')}.mp3")
+#     return audiobook_file_path
+
+
+
 def extract_text_from_pdf(pdf_path):
     text = ''
     with open(pdf_path, 'rb') as file:
@@ -166,19 +231,17 @@ def extract_text_from_pdf(pdf_path):
 # Function to detect language using Google Cloud Translation API
 def detect_language(text):
     translate_client = translate.Client()
-
-    # Using only the first 100 characters for language detection
     sample_text = text[:100]
     result = translate_client.detect_language(sample_text)
     
     return result['language']
 
 def text_to_speech(text, language_code, pdf_path):
+    # print(111)
     client = texttospeech.TextToSpeechClient()
-    combined_audio = AudioSegment.empty()  # For combining audio chunks
-
-    # Function to split text into chunks based on byte size, not character count
-    def split_text_by_byte_limit(text, byte_limit=4800):  # Slightly less than 5000 for safety
+    combined_audio = AudioSegment.empty()
+    
+    def split_text_by_byte_limit(text, byte_limit=4800):
         chunks = []
         current_chunk = ""
         for char in text:
@@ -187,36 +250,38 @@ def text_to_speech(text, language_code, pdf_path):
                 current_chunk = char
             else:
                 current_chunk += char
-        chunks.append(current_chunk)  # Add the last chunk if it's not empty
+        chunks.append(current_chunk)
         return chunks
-
+    print(111)
     chunks = split_text_by_byte_limit(text)
-
+    
     for i, chunk in enumerate(chunks):
         synthesis_input = texttospeech.SynthesisInput(text=chunk)
-        voice = texttospeech.VoiceSelectionParams(language_code=language_code, ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL)
+        voice = texttospeech.VoiceSelectionParams(
+            language_code=language_code,
+            ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+        )
         audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
-        response = client.synthesize_speech(input=synthesis_input, voice=voice, audio_config=audio_config)
+        response = client.synthesize_speech(
+            input=synthesis_input,
+            voice=voice,
+            audio_config=audio_config
+        )
 
-        # Convert response audio content to an audio segment
         audio_segment = AudioSegment.from_file(io.BytesIO(response.audio_content), format="mp3")
-        combined_audio += audio_segment  # Append audio segment to the combined audio
+        combined_audio += audio_segment
+    
+    output_file_path = f"/upload/audiobook_{os.path.basename(pdf_path).rstrip('.pdf')}.mp3"
+    combined_audio.export(output_file_path, format="mp3")
+    return output_file_path
 
-    # Export combined audio to a single MP3 file
-    combined_audio.export(f"/content/audiobook_{pdf_path.split('/')[-1].rstrip('.pdf')}.mp3", format="mp3")
-
-
-# Main execution flow
 
 def generate_audiobook(pdf_path):
     text = extract_text_from_pdf(pdf_path)
-    language_code = detect_language(text)  # Detect language from the first part of the text
-    text_to_speech(text, language_code, pdf_path)  # Convert text to speech and combine into a single MP3
-    audiobook_file_path = os.path.join('upload', f"audiobook_{os.path.basename(pdf_path).rstrip('.pdf')}.mp3")
+    language_code = detect_language(text)
+    audiobook_file_path = text_to_speech(text, language_code, pdf_path)
+    
     return audiobook_file_path
-
-
-
 
 # from google.cloud import storage
 
@@ -230,7 +295,7 @@ class MyarchiveList(APIView):
         print(request.data)
         serializer = MyarchiveSerializer(data=request.data)
         if serializer.is_valid():
-            print(1)
+            # print(1)
             instance = serializer.save()
 
             # Save the uploaded file to the 'uploaded' directory
@@ -254,8 +319,9 @@ class MyarchiveList(APIView):
             elif archive_type == 'audio':
                 # Call the generate_audiobook function
                 audiobook_file_path = generate_audiobook(uploaded_file_name)
+                print(audiobook_file_path)
                 # Save the generated audiobook file to the 'converted' directory
-                instance.converted.name = os.path.join('upload', os.path.basename(audiobook_file_path))
+                instance.converted = os.path.join('upload', os.path.basename(audiobook_file_path))
                 instance.save()
 
             # Return success response
@@ -267,6 +333,29 @@ class MyarchiveList(APIView):
 
 
 
+from django.http import HttpResponse
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+import os
+
+from django.http import FileResponse
+from django.views import View
+from django.conf import settings
+import os
+
+class FileDownloadView(APIView):
+    # permission_classes = [AllowAny]  # Allowing any user to download the file
+
+    def get(self, request, filename):
+        file_path = os.path.join(settings.BASE_DIR, 'upload', filename)
+        if os.path.exists(file_path):
+            response = FileResponse(open(file_path, 'rb'), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        else:
+            return HttpResponse("File not found", status=404)
+
+        
 
 
 

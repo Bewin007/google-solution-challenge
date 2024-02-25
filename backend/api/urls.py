@@ -6,4 +6,5 @@ urlpatterns = [
     # path('', include('api.urls')),
     path('',MyarchiveList.as_view()),
     path('library',LibraryView.as_view()),
+    path('download/<str:filename>', FileDownloadView.as_view(), name='file_download'),
 ]
