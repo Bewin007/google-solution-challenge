@@ -1,3 +1,6 @@
+Made for Google Solution Challenge 2024
+Book translator(pdf)
+
 ## Backend Setup
 
 1. Navigate to the backend folder:
